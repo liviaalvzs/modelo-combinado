@@ -1,6 +1,5 @@
 import pandas as pd 
 import json
-from rich import print
 from sklearn.metrics import mean_squared_error
 
 # le arquivo com os MSE de todos os modelos (antes de combinar)

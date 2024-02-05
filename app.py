@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 from merge_models import final_models, models_mse, calcular_mse
-from rich import print
 
 # Mapeamento de Regioes
 regioes = {'N': 'Norte',
