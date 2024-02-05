@@ -13,5 +13,5 @@ def calcular_mse(dataframe, coluna_real, coluna_predita):
     return mean_squared_error(dataframe[coluna_real], dataframe[coluna_predita])
 
 # le os modelos finais
-final_models = {subm: pd.read_csv(f'D:/modelo-combinado/src/final_model{subm}.csv') for subm in submercados}
+final_models = {subm: pd.read_csv(f'src/final_model{subm}.csv') for subm in submercados}
 
