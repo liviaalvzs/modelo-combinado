@@ -85,7 +85,7 @@ def percentual_melhoria(mse_modelo1, mse_modelo2):
 st.set_page_config(layout="wide")
 
 # Interface Streamlit
-st.title('Previsão de Carga - Regiões do Brasil')
+st.title('Modelo Combinado de Previsão de Carga')
 
 # Seleção de região
 region = st.selectbox('Selecione a região:', list(regioes.keys()))
