@@ -67,29 +67,36 @@ def plota_grafico_principal(df, region, show_prevcarga):
     
     return fig
 
-def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga):
+def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga, absolute):
     merged_df = pd.merge(df, df_novo_modelo, on='data_previsao', suffixes=('_m1', '_m2'))
     
     merged_df['Modelo Principal'] = merged_df['carga_prevista_final_m1'] - merged_df['carga_real_m1'] 
     
     merged_df['Modelo Estendido'] = merged_df['carga_prevista_final_m2'] - merged_df['carga_real_m2'] 
     
-    merged_df['PrevcargaDessem'] = merged_df['prevcarga'] - merged_df['carga_real_m2'] 
+    merged_df['PrevcargaDessem'] = merged_df['prevcarga_m2'] - merged_df['carga_real_m2'] 
     
     merged_df = merged_df.dropna()
     
     # Adiciona a coluna "Prevcarga" ao gráfico se a opção estiver selecionada
     y_columns = ['Modelo Principal', 'Modelo Estendido']
     if show_prevcarga:
-        y_columns.append('PrevCargaDessem')
+        y_columns.append('PrevcargaDessem')
     
-    fig = px.line(merged_df, x='data_previsao', y=abs(y_columns),
-                  title=f'Modelo Previsao de Carga + Modelo Estendodo - {regioes[region]}',
+    if absolute:
+        merged_df['Modelo Principal'] = merged_df['Modelo Principal'].abs()
+        merged_df['Modelo Estendido'] = merged_df['Modelo Estendido'].abs()
+        merged_df['PrevcargaDessem'] = merged_df['PrevcargaDessem'].abs()
+    
+    print(merged_df)
+    
+    fig = px.line(merged_df, x='data_previsao', y=y_columns,
+                  title=f'Modelo Previsao de Carga + Modelo Estendido - {regioes[region]}',
                   labels={'value': 'Carga'},
                   line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
 
-    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#80c423']).data[0])
-    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#491a74']).data[0])
+    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#80c423']).data[0])
+    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#491a74']).data[0])
 
     fig.update_layout(
         xaxis=dict(
@@ -107,7 +114,10 @@ def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga):
         )
     )
     
-    return fig
+    erro_total_modelo_principal = abs(merged_df['Modelo Principal']).sum() 
+    erro_total_modelo_estendido = abs(merged_df['Modelo Estendido']).sum() 
+    
+    return fig, erro_total_modelo_estendido, erro_total_modelo_principal
 
 # Função para criar tabela
 def create_table(valores, mapeamento_chaves):
@@ -140,6 +150,8 @@ def pagina_modelo_principal():
 
     # Mostrar gráfico para a região selecionada
     fig = plota_grafico_principal(df, region, show_prevcarga)
+    
+    df = df.rename(columns={'carga_prevista_final': 'Modelo Combinado Safira', 'carga_real': 'Carga', 'prevcarga': 'PrevCargaDessem'})
 
     # Cria a tabela
     mse_modelo_combinado = calcular_mse(df, 'Carga', 'Modelo Combinado Safira')
@@ -179,13 +191,26 @@ def pagina_novo_modelo():
 
     # Adiciona a caixa de seleção "Exibir PrevCarga"
     show_prevcarga = st.checkbox('Exibir PrevCarga')
+    absolute = st.checkbox('Exibir Valores Absolutos')
+    print(absolute)
 
     df = final_models[region]
     df_estendido = new_models[region]
     mse_values = models_mse[region]
 
     # Mostrar gráfico para a região selecionada
-    fig = plota_grafico_comparando_erros(df, df_estendido, region, show_prevcarga)
+    fig, erro_total_modelo_estendido, erro_total_modelo_principal = plota_grafico_comparando_erros(df, df_estendido, region, show_prevcarga, absolute)
+    
+    # plota grafico
+    fig.update_layout(
+        autosize=False, 
+        height=800  
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    st.markdown(f'### Erro Total:')
+    st.markdown(f'#####  Modelo Estendido: {erro_total_modelo_estendido}')
+    st.markdown(f'##### Modelo Principal: {erro_total_modelo_principal}')
     
 # Configuração da página para wide mode
 st.set_page_config(layout="wide")
