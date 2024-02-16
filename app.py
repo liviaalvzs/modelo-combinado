@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from merge_models import final_models, models_mse, calcular_mse
+from merge_models import final_models, models_mse, calcular_mse, new_models
 
 # Mapeamento de Regioes
 regioes = {'N': 'Norte',
@@ -30,7 +30,10 @@ mapeamento_chaves = {
                      }
 
 # Função para criar o gráfico interativo
-def create_plot(df, region, show_prevcarga):
+def plota_grafico_principal(df, region, show_prevcarga):
+    
+    df = df.rename(columns={'carga_prevista_final': 'Modelo Combinado Safira', 'carga_real': 'Carga', 'prevcarga': 'PrevCargaDessem'})
+    
     df['data_previsao'] = pd.to_datetime(df['data_previsao'])
     
     # Adiciona a coluna "Prevcarga" ao gráfico se a opção estiver selecionada
@@ -45,6 +48,48 @@ def create_plot(df, region, show_prevcarga):
 
     fig.add_trace(px.scatter(df, x='data_previsao', y='Carga', color_discrete_sequence=['#80c423']).data[0])
     fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Combinado Safira', color_discrete_sequence=['#491a74']).data[0])
+
+    fig.update_layout(
+        xaxis=dict(
+            rangeselector=dict(
+                buttons=list([
+                    dict(count=1, label="1 day", step="day", stepmode="backward"),
+                    dict(count=7, label="1 week", step="day", stepmode="backward"),
+                    dict(count=14, label="2 weeks", step="day", stepmode="backward"),
+                    dict(count=1, label="1 month", step="month", stepmode="backward"),
+                    dict(step="all")
+                ])
+            ),
+            rangeslider=dict(visible=True),
+            type="date"
+        )
+    )
+    
+    return fig
+
+def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga):
+    merged_df = pd.merge(df, df_novo_modelo, on='data_previsao', suffixes=('_m1', '_m2'))
+    
+    merged_df['Modelo Principal'] = merged_df['carga_prevista_final_m1'] - merged_df['carga_real_m1'] 
+    
+    merged_df['Modelo Estendido'] = merged_df['carga_prevista_final_m2'] - merged_df['carga_real_m2'] 
+    
+    merged_df['PrevcargaDessem'] = merged_df['prevcarga'] - merged_df['carga_real_m2'] 
+    
+    merged_df = merged_df.dropna()
+    
+    # Adiciona a coluna "Prevcarga" ao gráfico se a opção estiver selecionada
+    y_columns = ['Modelo Principal', 'Modelo Estendido']
+    if show_prevcarga:
+        y_columns.append('PrevCargaDessem')
+    
+    fig = px.line(merged_df, x='data_previsao', y=abs(y_columns),
+                  title=f'Modelo Previsao de Carga + Modelo Estendodo - {regioes[region]}',
+                  labels={'value': 'Carga'},
+                  line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
+
+    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#80c423']).data[0])
+    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#491a74']).data[0])
 
     fig.update_layout(
         xaxis=dict(
@@ -80,54 +125,83 @@ def create_table(valores, mapeamento_chaves):
 def percentual_melhoria(mse_modelo1, mse_modelo2):
     return ((mse_modelo1 - mse_modelo2) / mse_modelo1) * 100
 
+def pagina_modelo_principal():
+    # Configuração da página para wide mode
+    st.set_page_config(layout="wide")
 
-# Configuração da página para wide mode
-st.set_page_config(layout="wide")
+    # Interface Streamlit
+    st.title('Modelo Combinado de Previsão de Carga')
 
-# Interface Streamlit
-st.title('Modelo Combinado de Previsão de Carga')
+    # Seleção de região
+    region = st.selectbox('Selecione a região:', list(regioes.keys()))
 
-# Seleção de região
-region = st.selectbox('Selecione a região:', list(regioes.keys()))
+    # Adiciona a caixa de seleção "Exibir PrevCarga"
+    show_prevcarga = st.checkbox('Exibir PrevCarga')
 
-# Adiciona a caixa de seleção "Exibir PrevCarga"
-show_prevcarga = st.checkbox('Exibir PrevCarga')
+    df = final_models[region]
+    mse_values = models_mse[region]
 
-df = final_models[region]
-mse_values = models_mse[region]
+    # Mostrar gráfico para a região selecionada
+    fig = plota_grafico_principal(df, region, show_prevcarga)
 
-df = df.rename(columns={'carga_prevista_final': 'Modelo Combinado Safira', 
-                        'carga_real': 'Carga', 
-                        'prevcarga': 'PrevCargaDessem'})
+    # Cria a tabela
+    mse_modelo_combinado = calcular_mse(df, 'Carga', 'Modelo Combinado Safira')
+    min_mse_modelo, min_mse_valor = min(mse_values.items(), key=lambda x: x[1])
 
-# Mostrar gráfico para a região selecionada
-fig = create_plot(df, region, show_prevcarga)
+    mse_values_copy = mse_values.copy()
+    mse_values_copy['Modelo Combinado Safira'] = mse_modelo_combinado
+    df_tabela = create_table(mse_values_copy, mapeamento_chaves)
 
-# Cria a tabela
-mse_modelo_combinado = calcular_mse(df, 'Carga', 'Modelo Combinado Safira')
-min_mse_modelo, min_mse_valor = min(mse_values.items(), key=lambda x: x[1])
+    # plota grafico
+    fig.update_layout(
+        autosize=False, 
+        height=800  
+    )
+    st.plotly_chart(fig, use_container_width=True)
 
-mse_values_copy = mse_values.copy()
-mse_values_copy['Modelo Combinado Safira'] = mse_modelo_combinado
-df_tabela = create_table(mse_values_copy, mapeamento_chaves)
+    st.markdown("### **MSE dos Modelos Individuais, Modelo Combinado e PrevCarga DESSEM**")
 
-# plota grafico
-fig.update_layout(
-    autosize=False, 
-    height=800  
-)
-st.plotly_chart(fig, use_container_width=True)
+    valor_mse_prevcarga_d = df_tabela.loc[df_tabela['Modelo'] == 'Prevcarga D', 'Valor do MSE'].values[0]
+    valor_mse_melhor_modelo = df_tabela['Valor do MSE'].min()
 
-st.markdown("### **MSE dos Modelos Individuais, Modelo Combinado e PrevCarga DESSEM**")
+    comp_safira_prevcarga = percentual_melhoria(valor_mse_prevcarga_d, mse_modelo_combinado)
+    comp_safira_melhor_modelo = percentual_melhoria(min_mse_valor, mse_modelo_combinado)
 
-valor_mse_prevcarga_d = df_tabela.loc[df_tabela['Modelo'] == 'Prevcarga D', 'Valor do MSE'].values[0]
-valor_mse_melhor_modelo = df_tabela['Valor do MSE'].min()
+    st.table(df_tabela)
 
-comp_safira_prevcarga = percentual_melhoria(valor_mse_prevcarga_d, mse_modelo_combinado)
-comp_safira_melhor_modelo = percentual_melhoria(min_mse_valor, mse_modelo_combinado)
+    st.markdown(f'### Percentual de melhoria entre...')
+    st.markdown(f'#### Modelo Combinado e o Melhor modelo ({min_mse_modelo}): **{comp_safira_melhor_modelo:.2f}%**')
+    st.markdown(f'#### Modelo Combinado e o PREVCARGA DESSEM: **{comp_safira_prevcarga:.2f}%**')
 
-st.table(df_tabela)
+def pagina_novo_modelo():
+    # Configuração da página para wide mode
+    st.set_page_config(layout="wide")
 
-st.markdown(f'### Percentual de melhoria entre...')
-st.markdown(f'#### Modelo Combinado e o Melhor modelo ({min_mse_modelo}): **{comp_safira_melhor_modelo:.2f}%**')
-st.markdown(f'#### Modelo Combinado e o PREVCARGA DESSEM: **{comp_safira_prevcarga:.2f}%**')
+    # Interface Streamlit
+    st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
+
+    # Seleção de região
+    region = st.selectbox('Selecione a região:', list(regioes.keys()))
+
+    # Adiciona a caixa de seleção "Exibir PrevCarga"
+    show_prevcarga = st.checkbox('Exibir PrevCarga')
+
+    df = final_models[region]
+    df_estendido = new_models[region]
+    mse_values = models_mse[region]
+
+    # Mostrar gráfico para a região selecionada
+    fig = plota_grafico_comparando_erros(df, df_estendido, region, show_prevcarga)
+    
+# Definindo a estrutura do menu
+paginas = {
+    "Modelo Principal": pagina_modelo_principal,
+    "Modelo com treino estendido": pagina_novo_modelo
+}
+
+# Adicionando a seleção do menu
+st.sidebar.title("Menu")
+selecao_pagina = st.sidebar.radio("Ir para", list(paginas.keys()))
+
+# Executando a página selecionada
+paginas[selecao_pagina]()

@@ -15,3 +15,4 @@ def calcular_mse(dataframe, coluna_real, coluna_predita):
 # le os modelos finais
 final_models = {subm: pd.read_csv(f'src/final_model{subm}.csv') for subm in submercados}
 
+new_models = {subm: pd.read_csv(f'src/modelo_estendido/final_model{subm}.csv') for subm in submercados}
