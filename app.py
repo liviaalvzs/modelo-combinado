@@ -126,9 +126,6 @@ def percentual_melhoria(mse_modelo1, mse_modelo2):
     return ((mse_modelo1 - mse_modelo2) / mse_modelo1) * 100
 
 def pagina_modelo_principal():
-    # Configuração da página para wide mode
-    st.set_page_config(layout="wide")
-
     # Interface Streamlit
     st.title('Modelo Combinado de Previsão de Carga')
 
@@ -174,9 +171,6 @@ def pagina_modelo_principal():
     st.markdown(f'#### Modelo Combinado e o PREVCARGA DESSEM: **{comp_safira_prevcarga:.2f}%**')
 
 def pagina_novo_modelo():
-    # Configuração da página para wide mode
-    #st.set_page_config(layout="wide")
-
     # Interface Streamlit
     st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
 
@@ -193,6 +187,9 @@ def pagina_novo_modelo():
     # Mostrar gráfico para a região selecionada
     fig = plota_grafico_comparando_erros(df, df_estendido, region, show_prevcarga)
     
+# Configuração da página para wide mode
+st.set_page_config(layout="wide")
+
 # Definindo a estrutura do menu
 paginas = {
     "Modelo Principal": pagina_modelo_principal,
