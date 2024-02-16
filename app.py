@@ -175,7 +175,7 @@ def pagina_modelo_principal():
 
 def pagina_novo_modelo():
     # Configuração da página para wide mode
-    st.set_page_config(layout="wide")
+    #st.set_page_config(layout="wide")
 
     # Interface Streamlit
     st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
