@@ -42,7 +42,7 @@ def plota_grafico_principal(df, region, show_prevcarga):
         y_columns.append('PrevCargaDessem')
     
     fig = px.line(df, x='data_previsao', y=y_columns,
-                  title=f'Modelo Previsao de Carga - {regioes[region]}',
+                  title=f'Modelo Previsão de Carga - {regioes[region]}',
                   labels={'value': 'Carga'},
                   line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
 
@@ -91,7 +91,7 @@ def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga, a
     print(merged_df)
     
     fig = px.line(merged_df, x='data_previsao', y=y_columns,
-                  title=f'Modelo Previsao de Carga + Modelo Estendido - {regioes[region]}',
+                  title=f'Modelo Previsão de Carga + Modelo Estendido - {regioes[region]}',
                   labels={'value': 'Carga'},
                   line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
 
