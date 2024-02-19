@@ -185,33 +185,6 @@ def pagina_modelo_principal():
 def pagina_novo_modelo():
     # Interface Streamlit
     st.title('🚧 Em testes')
-    return 0
-    # Seleção de região
-    '''region = st.selectbox('Selecione a região:', list(regioes.keys()))
-    st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
-
-    # Adiciona a caixa de seleção "Exibir PrevCarga"
-    show_prevcarga = st.checkbox('Exibir PrevCarga')
-    absolute = st.checkbox('Exibir Valores Absolutos')
-    print(absolute)
-
-    df = final_models[region]
-    df_estendido = new_models[region]
-    mse_values = models_mse[region]
-
-    # Mostrar gráfico para a região selecionada
-    fig, erro_total_modelo_estendido, erro_total_modelo_principal = plota_grafico_comparando_erros(df, df_estendido, region, show_prevcarga, absolute)
-    
-    # plota grafico
-    fig.update_layout(
-        autosize=False, 
-        height=800  
-    )
-    
-    st.plotly_chart(fig, use_container_width=True)
-    st.markdown(f'### Erro Total:')
-    st.markdown(f'#####  Modelo Estendido: {erro_total_modelo_estendido}')
-    st.markdown(f'##### Modelo Principal: {erro_total_modelo_principal}')'''
     
 # Configuração da página para wide mode
 st.set_page_config(layout="wide")
