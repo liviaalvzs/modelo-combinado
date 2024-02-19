@@ -44,9 +44,9 @@ def plota_grafico_principal(df, region, show_prevcarga):
     fig = px.line(df, x='data_previsao', y=y_columns,
                   title=f'Modelo Previsão de Carga - {regioes[region]}',
                   labels={'value': 'Carga'},
-                  line_shape='linear', color_discrete_sequence=['#80c423', '#001972', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
+                  line_shape='linear', color_discrete_sequence=['#44bf00', '#001972', '#ff6d00' if show_prevcarga else 'rgba(0,0,0,0)'])
 
-    fig.add_trace(px.scatter(df, x='data_previsao', y='Carga', color_discrete_sequence=['#80c423']).data[0])
+    fig.add_trace(px.scatter(df, x='data_previsao', y='Carga', color_discrete_sequence=['#44bf00']).data[0])
     fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Combinado Safira', color_discrete_sequence=['#001972']).data[0])
 
     fig.update_layout(
@@ -93,9 +93,9 @@ def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga, a
     fig = px.line(merged_df, x='data_previsao', y=y_columns,
                   title=f'Modelo Previsão de Carga + Modelo Estendido - {regioes[region]}',
                   labels={'value': 'Carga'},
-                  line_shape='linear', color_discrete_sequence=['#80c423', '#001972', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
+                  line_shape='linear', color_discrete_sequence=['#44bf00', '#001972', '#ff6d00' if show_prevcarga else 'rgba(0,0,0,0)'])
 
-    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#80c423']).data[0])
+    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#44bf00']).data[0])
     fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#001972']).data[0])
 
     fig.update_layout(
