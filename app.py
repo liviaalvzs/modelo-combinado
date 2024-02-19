@@ -184,8 +184,8 @@ def pagina_modelo_principal():
 
 def pagina_novo_modelo():
     # Interface Streamlit
-    st.title('Em testes')
-
+    st.title('🚧 Em testes')
+    return 0
     # Seleção de região
     '''region = st.selectbox('Selecione a região:', list(regioes.keys()))
     st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
