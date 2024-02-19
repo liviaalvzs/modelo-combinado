@@ -44,10 +44,10 @@ def plota_grafico_principal(df, region, show_prevcarga):
     fig = px.line(df, x='data_previsao', y=y_columns,
                   title=f'Modelo Previsão de Carga - {regioes[region]}',
                   labels={'value': 'Carga'},
-                  line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
+                  line_shape='linear', color_discrete_sequence=['#80c423', '#001972', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
 
     fig.add_trace(px.scatter(df, x='data_previsao', y='Carga', color_discrete_sequence=['#80c423']).data[0])
-    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Combinado Safira', color_discrete_sequence=['#491a74']).data[0])
+    fig.add_trace(px.scatter(df, x='data_previsao', y='Modelo Combinado Safira', color_discrete_sequence=['#001972']).data[0])
 
     fig.update_layout(
         xaxis=dict(
@@ -93,10 +93,10 @@ def plota_grafico_comparando_erros(df, df_novo_modelo, region, show_prevcarga, a
     fig = px.line(merged_df, x='data_previsao', y=y_columns,
                   title=f'Modelo Previsão de Carga + Modelo Estendido - {regioes[region]}',
                   labels={'value': 'Carga'},
-                  line_shape='linear', color_discrete_sequence=['#80c423', '#491a74', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
+                  line_shape='linear', color_discrete_sequence=['#80c423', '#001972', '#f35b04' if show_prevcarga else 'rgba(0,0,0,0)'])
 
     fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Principal', color_discrete_sequence=['#80c423']).data[0])
-    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#491a74']).data[0])
+    fig.add_trace(px.scatter(merged_df, x='data_previsao', y='Modelo Estendido', color_discrete_sequence=['#001972']).data[0])
 
     fig.update_layout(
         xaxis=dict(
@@ -184,10 +184,11 @@ def pagina_modelo_principal():
 
 def pagina_novo_modelo():
     # Interface Streamlit
-    st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
+    st.title('Em testes')
 
     # Seleção de região
-    region = st.selectbox('Selecione a região:', list(regioes.keys()))
+    '''region = st.selectbox('Selecione a região:', list(regioes.keys()))
+    st.title('Modelo Combinado de Previsão de Carga comparado com o Modelo Estendido')
 
     # Adiciona a caixa de seleção "Exibir PrevCarga"
     show_prevcarga = st.checkbox('Exibir PrevCarga')
@@ -210,7 +211,7 @@ def pagina_novo_modelo():
     st.plotly_chart(fig, use_container_width=True)
     st.markdown(f'### Erro Total:')
     st.markdown(f'#####  Modelo Estendido: {erro_total_modelo_estendido}')
-    st.markdown(f'##### Modelo Principal: {erro_total_modelo_principal}')
+    st.markdown(f'##### Modelo Principal: {erro_total_modelo_principal}')'''
     
 # Configuração da página para wide mode
 st.set_page_config(layout="wide")
